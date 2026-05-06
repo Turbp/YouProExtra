@@ -34,7 +34,7 @@ on:
 
       ytuhd:
         description: "Integrate YTUHD"
-        default: true
+        default: false
         required: false
         type: boolean
 
@@ -46,13 +46,13 @@ on:
 
       ytabconfig:
         description: "Integrate YTABConfig"
-        default: true
+        default: false
         required: false
         type: boolean
 
       youquality:
         description: "Integrate YouQuality"
-        default: true
+        default: false
         required: false
         type: boolean
 
