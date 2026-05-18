@@ -27,6 +27,10 @@ on:
         type: boolean
         required: false
         default: false
+      opensafari:
+        type: boolean
+        required: false
+        default: true  
 
 jobs:
   build-tweaks:
@@ -76,6 +80,7 @@ jobs:
           chmod +x /usr/local/bin/tbd
 
       - name: Clone Open in YouTube (Safari Extension)
+        if: inputs.opensafari == true
         run: |
           git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/BillyCurtis/OpenYouTubeSafariExtension.git
           cd OpenYouTubeSafariExtension
@@ -85,18 +90,17 @@ jobs:
 
       - name: Clone YouTubeHeader
         run: |
-          if [ ! -d "$THEOS/include/YouTubeHeader" ]; then
-            git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git $THEOS/include/YouTubeHeader
-          fi
-          if [ "${{ inputs.demc }}" = "true" ] && [ ! -d "$THEOS/include/YTHeaders" ]; then
+          rm -rf $THEOS/include/YouTubeHeader
+          git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git $THEOS/include/YouTubeHeader
+          if [ "${{ inputs.demc }}" = "true" ]; then
+            rm -rf $THEOS/include/YTHeaders
             cp -r "$THEOS/include/YouTubeHeader" "$THEOS/include/YTHeaders"
           fi
 
       - name: Clone PSHeader
         run: |
-          if [ ! -d "$THEOS/include/PSHeader" ]; then
-            git clone --quiet --depth=1 https://github.com/PoomSmart/PSHeader.git $THEOS/include/PSHeader
-          fi
+          rm -rf $THEOS/include/PSHeader
+          git clone --quiet --depth=1 https://github.com/PoomSmart/PSHeader.git $THEOS/include/PSHeader
 
       - name: Clone YTVideoOverlay
         run: git clone --quiet --depth=1 https://github.com/PoomSmart/YTVideoOverlay.git
@@ -126,7 +130,7 @@ jobs:
           youslider_commit: ${{ steps.commit_hashes.outputs.youslider }}
           youchoose_commit: ${{ steps.commit_hashes.outputs.youchoose }}
           ytsilentvote_commit: ${{ steps.commit_hashes.outputs.ytsilentvote }}
-          youshare_commit: ${{ steps.commit_hashes.outputs.youshare }}
+#          youshare_commit: ${{ steps.commit_hashes.outputs.youshare }}
           gonerino_commit: ${{ steps.commit_hashes.outputs.gonerino }}
           ytweaks_commit: ${{ steps.commit_hashes.outputs.ytweaks }}
           yougetcaption_commit: ${{ steps.commit_hashes.outputs.yougetcaption }}
@@ -151,7 +155,6 @@ jobs:
           cd YouPro
           chmod -R 755 .
           dpkg-deb --root-owner-group -Zgzip --build . ../YouPro.deb
-          mv ../YouPro.deb ${{ github.workspace }}/YouPro.deb
           
       - name: Clone and Build YouPiP
         if: steps.cache_tweaks.outputs.cache_youpip_hit != 'true'
@@ -164,7 +167,7 @@ jobs:
         if: steps.cache_tweaks.outputs.cache_ytuhd_hit != 'true'
         run: |
           git clone --quiet --depth=1 https://github.com/Tonwalter888/YTUHD.git
-          cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless SIDELOAD=1
+          cd YTUHD && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/ytuhd.deb
 
       - name: Clone and Build Return-YouTube-Dislikes
@@ -244,12 +247,12 @@ jobs:
           cd YTSilentVote && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/ytnovote.deb
 
-      - name: Clone and Build YouShare
-        if: steps.cache_tweaks.outputs.cache_youshare_hit != 'true'
-        run: |
-          git clone --quiet --depth=1 https://github.com/Tonwalter888/YouShare.git
-          cd YouShare && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-          mv packages/*.deb ${{ github.workspace }}/youshare.deb
+#      - name: Clone and Build YouShare
+#        if: steps.cache_tweaks.outputs.cache_youshare_hit != 'true'
+#        run: |
+#          git clone --quiet --depth=1 https://github.com/Tonwalter888/YouShare.git
+#          cd YouShare && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+#          mv packages/*.deb ${{ github.workspace }}/youshare.deb
 
       - name: Clone and Build Gonerino
         if: steps.cache_tweaks.outputs.cache_gonerino_hit != 'true'

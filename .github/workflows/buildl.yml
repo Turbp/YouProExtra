@@ -1,7 +1,15 @@
-name: Build YouTubePlus (YTLite) IPA
+name: Build LRD/DLTube IPA
 on:
   workflow_dispatch:
     inputs:
+      tweak_choice:
+        description: "LRD/DLTube"
+        required: true
+        type: choice
+        options:
+          - LRD
+          - DLTube
+
       ipa_url:
         description: "URL to the decrypted IPA file"
         default: ""
@@ -24,8 +32,8 @@ on:
         description: "Integrate Open in YouTube (Safari Extension)"
         default: true
         required: false
-        type: boolean
-        
+        type: boolean        
+
       demc:
         description: "Integrate DontEatMyContent"
         default: true
@@ -40,7 +48,7 @@ on:
 
       ytuhd:
         description: "Integrate YTUHD"
-        default: false
+        default: true
         required: false
         type: boolean
 
@@ -52,22 +60,22 @@ on:
 
       ytabconfig:
         description: "Integrate YTABConfig"
-        default: false
+        default: true
         required: false
         type: boolean
 
       youquality:
         description: "Integrate YouQuality"
-        default: false
+        default: true
         required: false
         type: boolean
 
       youchoose:
         description: "Integrate YouChooseQuality"
-        default: false
+        default: true
         required: false
         type: boolean
-        
+
       ythold:
         description: "Integrate YTHoldForSpeed"
         default: false
@@ -84,7 +92,7 @@ on:
         description: "Integrate YTNativeShare"
         default: false
         required: false
-        type: boolean        
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -92,7 +100,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build YouTubePlus (YTLite) IPA
+    name: Build LRD/DLTube IPA
     runs-on: macos-latest
     permissions:
       contents: write
@@ -104,7 +112,7 @@ jobs:
       - name: Hide Sensitive Inputs
         uses: levibostian/action-hide-sensitive-inputs@v1
         with:
-          exclude_inputs: bundle_id,display_name,youpip,ytuhd,ryd,ytabconfig,youquality,demc,youchoose,ythold,volumeboost,nativeshare,opensafari
+          exclude_inputs: tweak_choice,bundle_id,display_name,youpip,ytuhd,ryd,ytabconfig,youquality,demc,youchoose,ythold,volumeboost,nativeshare,opensafari
 
       - name: Download and Validate IPA
         run: |
@@ -120,7 +128,7 @@ jobs:
           unzip -q youtube.ipa -d ytextracted
           echo "YT_VERSION=$(grep -A 1 '<key>CFBundleVersion</key>' ytextracted/Payload/YouTube.app/Info.plist | grep '<string>' | awk -F'[><]' '{print $3}')" >> $GITHUB_ENV
           rm -rf ytextracted
-          
+
       - name: Get Commit Hashes
         id: commit_hashes
         uses: ./.github/actions/get-commit-hashes
@@ -221,14 +229,25 @@ jobs:
           cd YTVideoOverlay && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/ytvo.deb
 
-      - name: Clone and Build YTLite
+      - name: Checkout Base Tweak
+        uses: actions/checkout@v4
+        with:
+          repository: mrdrvt99/LRD-DLTube
+          ref: ${{ inputs.tweak_choice == 'LRD' && 'main' || 'main1' }}
+          path: base_tweak
+          submodules: recursive
+
+      - name: Build Base Tweak
         run: |
-          git clone --quiet --depth=1 https://github.com/mrdrvt99/YTL.git
-          cd YTL
-          echo "YTL_VERSION=$(grep '^Version:' DEBIAN/control | awk '{print $2}')" >> $GITHUB_ENV
+          cd base_tweak
+          echo "TWEAK_VERSION=$(grep '^Version:' DEBIAN/control | awk '{print $2}')" >> $GITHUB_ENV
           chmod -R 755 .
-          dpkg-deb --root-owner-group -Zgzip --build . ../ytlite.deb
-          
+          if [ "${{ inputs.tweak_choice }}" = "LRD" ]; then
+            dpkg-deb --root-owner-group -Zgzip --build . ${{ github.workspace }}/TubeLRD.deb
+          else
+            dpkg-deb --root-owner-group -Zgzip --build . ${{ github.workspace }}/DLTube.deb
+          fi
+
       - name: Clone and Build YouPiP
         if: inputs.youpip == true && steps.cache_tweaks.outputs.cache_youpip_hit != 'true'
         run: |
@@ -298,12 +317,12 @@ jobs:
           git clone --quiet --depth=1 https://github.com/PoomSmart/YTVideoErrorAlert.git
           cd YTVideoErrorAlert && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/ytvideoerror.deb
-          
+
       - name: Clone and Build YTHoldForSpeed
         if: inputs.ythold == true && steps.cache_tweaks.outputs.cache_ythold_hit != 'true'
         run: |
           git clone --quiet --depth=1 https://github.com/joshuaseltzer/YTHoldForSpeed.git
-          cd YTHoldForSpeed && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless ARCHS=arm64 TARGET=iphone:clang:latest:15.0 
+          cd YTHoldForSpeed && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless ARCHS=arm64 TARGET=iphone:clang:latest:15.0
           mv packages/*.deb ${{ github.workspace }}/ythold.deb
 
       - name: Clone and Build VolumeBoostYT
@@ -331,18 +350,18 @@ jobs:
           for f in *.deb; do
             [ -f "$f" ] && tweaks="$tweaks $f"
           done
-          cyan -i youtube.ipa -o YouTubePlus_${{ env.YT_VERSION }}_${{ env.YTL_VERSION }}.ipa -uwesf $tweaks -n "${{ inputs.display_name }}" -b ${{ inputs.bundle_id }}
-          
+          cyan -i youtube.ipa -o YouTube_${{ inputs.tweak_choice }}_${{ env.YT_VERSION }}_${{ env.TWEAK_VERSION }}.ipa -uwesf $tweaks -n "${{ inputs.display_name }}" -b ${{ inputs.bundle_id }}
+
       - name: Create a Draft Release
         uses: softprops/action-gh-release@v2.6.2
         with:
-          tag_name: ytl-ipa${{ github.run_number }}
-          name: YouTubePlus_${{ env.YT_VERSION }}_${{ env.YTL_VERSION }} (${{ github.run_number }})
-          files: YouTubePlus_${{ env.YT_VERSION }}_${{ env.YTL_VERSION }}.ipa
+          tag_name: yt-ipa${{ github.run_number }}
+          name: YouTube_${{ inputs.tweak_choice }}_${{ env.YT_VERSION }}_${{ env.TWEAK_VERSION }} (${{ github.run_number }})
+          files: YouTube_${{ inputs.tweak_choice }}_${{ env.YT_VERSION }}_${{ env.TWEAK_VERSION }}.ipa
           draft: true
 
       - name: Job Summary - Build Complete
-        run: echo -e '### 🛠️ Build YouTubePlus (YTLite) IPA Complete!' >> $GITHUB_STEP_SUMMARY
+        run: echo -e '### 🛠️ Build YouTube IPA Complete!' >> $GITHUB_STEP_SUMMARY
 
       - name: Job Summary - Output the Draft Release Link
         run: |

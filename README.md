@@ -3,7 +3,7 @@ YouTube IPA builder packed with customizable tweaks. Also Known as Youtubemaxxin
 
 > [!IMPORTANT]
 > ## 🆕 New Feature
-> YouProEXTRA now has an official AltStore/SideStore/Feather source. Install any mod directly on your device and get automatic updates. no building, no decrypted IPAs required.
+> YouProEXTRA now has an official AltStore/Esign/Feather/SideStore/LiveContainer source. Install any mod directly on your device and get automatic updates. no building, no decrypted IPAs required.
 >
 > AIO Package and separate source files. links are avaliable below
 > 
@@ -16,6 +16,8 @@ YouTube IPA builder packed with customizable tweaks. Also Known as Youtubemaxxin
 - **[YouPro](https://t.me/alibusut)** - Basic Youtube Premium features; Download Videos, No ads, Background Playback.
 - **[YoutubePlus/YTLite](https://github.com/dayanch96/YTLite)** - A flexible enhancer for YouTube on iOS, featuring over hundred customizable options.
 - **[YTKillerPlus](https://repo.ikghd.me/depictions/?p=me.ikghd.ytkplus)** - Alternative Youtube tweak with more custiomized options.
+- **[YouMod](https://github.com/Tonwalter888/YouMod)** - a free alternative youtube tweak.
+- **[LRD](https://t.me/LRD_Update)/[DLTube](https://x.com/dltweaks_)** - more optional YouTube tweaks. Download Videos, No ads and Background Playback.
 - [YouPip](https://github.com/PoomSmart/YouPiP) -  Enables native PiP in iOS YouTube app.
 - [YTUHD](https://github.com/Tonwalter888/YTUHD) - Unlocks 1440p and 2160p resolutions in iOS YouTube app.
 - [ReturnYoutubeDislikes](https://github.com/PoomSmart/Return-YouTube-Dislikes) -  Brings Back Dislikes On YouTube iOS. 
@@ -76,7 +78,7 @@ YouTube IPA builder packed with customizable tweaks. Also Known as Youtubemaxxin
 
 ## Supported YouTube version
 <ul>
-   <li><strong>Latest confirmed:</strong> 21.18.4</li>
-   <li><strong>Date tested:</strong> May 4, 2026</li>
-   <li><strong>YouPro/YTLite/YTKP:</strong> 0.3/5.2.1/5.0</li>
+   <li><strong>Latest confirmed:</strong> 21.19.2</li>
+   <li><strong>Date tested:</strong> May 12, 2026</li>
+   <li><strong>YouPro/YTLite/YTKP:</strong> 0.3/5.2.1/5.3.2</li>
 </ul>
