@@ -82,13 +82,13 @@ jobs:
 
     steps:
       - name: Download Built Debs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: built-debs
           path: ${{ github.workspace }}
 
       - name: Hide Sensitive Inputs
-        uses: levibostian/action-hide-sensitive-inputs@v1
+        uses: levibostian/action-hide-sensitive-inputs@1.2.0
         with:
           exclude_inputs: bundle_id,display_name,demc,isponsorblock,ythold,volumeboost,nativeshare,opensafari
 
@@ -123,12 +123,18 @@ jobs:
           cyan -i youtube.ipa -o YouProExtra_IPA_${{ env.YT_VERSION }}.ipa -uwesf $tweaks -n "${{ inputs.display_name }}" -b ${{ inputs.bundle_id }}
           
       - name: Create a Draft Release
-        uses: softprops/action-gh-release@v2.6.2
-        with:
-          tag_name: youproextra-noytlite-ipa${{ github.run_number }}
-          name: YouProExtra_IPA_${{ env.YT_VERSION }} (${{ github.run_number }})
-          files: YouProExtra_IPA_${{ env.YT_VERSION }}.ipa
-          draft: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          i=1
+          while gh release view "youproextra-noytlite-ipa${i}" --repo "$GITHUB_REPOSITORY" &>/dev/null; do
+            i=$(( i + 1 ))
+          done
+          gh release create "youproextra-noytlite-ipa${i}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "YouProExtra_IPA_${{ env.YT_VERSION }}" \
+            --draft \
+            YouProExtra_IPA_${{ env.YT_VERSION }}.ipa
 
       - name: Job Summary - Build Complete
         run: echo -e '### 🛠️ Build IPA Complete!' >> $GITHUB_STEP_SUMMARY
