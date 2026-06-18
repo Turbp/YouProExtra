@@ -1,13 +1,13 @@
-name: Build LRD/DLTube IPA
+name: Build TubeLRD/DLTube IPA
 on:
   workflow_dispatch:
     inputs:
       tweak_choice:
-        description: "LRD/DLTube"
+        description: "TubeLRD/DLTube"
         required: true
         type: choice
         options:
-          - LRD
+          - TubeLRD
           - DLTube
 
       ipa_url:
@@ -27,7 +27,7 @@ on:
         default: "com.google.ios.youtube"
         required: true
         type: string
-        
+
       opensafari:
         description: "Integrate Open in YouTube (Safari Extension)"
         default: true
@@ -75,7 +75,7 @@ on:
         default: true
         required: false
         type: boolean
-        
+
       gonerino:
         description: "Integrate Gonerino"
         default: false
@@ -87,7 +87,7 @@ on:
         default: false
         required: false
         type: boolean
-        
+
       ythold:
         description: "Integrate YTHoldForSpeed"
         default: false
@@ -112,14 +112,15 @@ concurrency:
 
 jobs:
   build:
-    name: Build LRD/DLTube IPA
+    name: Build TubeLRD/DLTube IPA
     runs-on: macos-latest
     permissions:
       contents: write
-
+    env:
+      HOMEBREW_NO_ENV_HINTS: 1
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
 
       - name: Hide Sensitive Inputs
         uses: levibostian/action-hide-sensitive-inputs@1.2.0
@@ -151,7 +152,10 @@ jobs:
           nativeshare: ${{ inputs.nativeshare }}
 
       - name: Install Dependencies
-        run: brew install make ldid swiftlint dpkg
+        run: |
+          brew uninstall --ignore-dependencies bicep || true
+          brew untap aws/tap azure/bicep || true
+          brew install --quiet make ldid swiftlint dpkg meson ninja
 
       - name: Set PATH Environment Variables
         run: |
@@ -234,7 +238,6 @@ jobs:
           ytabconfig_commit: ${{ steps.commit_hashes.outputs.ytabconfig }}
           youquality_commit: ${{ steps.commit_hashes.outputs.youquality }}
           demc_commit: ${{ steps.commit_hashes.outputs.demc }}
-          ytvid_commit: ${{ steps.commit_hashes.outputs.ytvid }}
           ythold_commit: ${{ steps.commit_hashes.outputs.ythold }}
           volumeboost_commit: ${{ steps.commit_hashes.outputs.volumeboost }}
           nativeshare_commit: ${{ steps.commit_hashes.outputs.nativeshare }}
@@ -246,10 +249,10 @@ jobs:
           mv packages/*.deb ${{ github.workspace }}/ytvo.deb
 
       - name: Checkout Base Tweak
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           repository: mrdrvt99/LRD-DLTube
-          ref: ${{ inputs.tweak_choice == 'LRD' && 'main' || 'main1' }}
+          ref: ${{ inputs.tweak_choice == 'TubeLRD' && 'main' || 'main1' }}
           path: base_tweak
           submodules: recursive
 
@@ -258,7 +261,7 @@ jobs:
           cd base_tweak
           echo "TWEAK_VERSION=$(grep '^Version:' DEBIAN/control | awk '{print $2}')" >> $GITHUB_ENV
           chmod -R 755 .
-          if [ "${{ inputs.tweak_choice }}" = "LRD" ]; then
+          if [ "${{ inputs.tweak_choice }}" = "TubeLRD" ]; then
             dpkg-deb --root-owner-group -Zgzip --build . ${{ github.workspace }}/TubeLRD.deb
           else
             dpkg-deb --root-owner-group -Zgzip --build . ${{ github.workspace }}/DLTube.deb
@@ -326,20 +329,13 @@ jobs:
           git clone --quiet --depth=1 https://github.com/PoomSmart/YouGetCaption.git
           cd YouGetCaption && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/ygc.deb
-          
+
       - name: Clone and Build DontEatMyContent
         if: inputs.demc == true && steps.cache_tweaks.outputs.cache_demc_hit != 'true'
         run: |
           git clone --quiet --depth=1 https://github.com/therealFoxster/DontEatMyContent.git
           cd DontEatMyContent && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           mv packages/*.deb ${{ github.workspace }}/demc.deb
-
-      - name: Clone and Build YTVideoErrorAlert
-        if: steps.cache_tweaks.outputs.cache_ytvid_hit != 'true'
-        run: |
-          git clone --quiet --depth=1 https://github.com/PoomSmart/YTVideoErrorAlert.git
-          cd YTVideoErrorAlert && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-          mv packages/*.deb ${{ github.workspace }}/ytvideoerror.deb
 
       - name: Clone and Build YTHoldForSpeed
         if: inputs.ythold == true && steps.cache_tweaks.outputs.cache_ythold_hit != 'true'
@@ -354,7 +350,7 @@ jobs:
           git clone --quiet --depth=1 https://github.com/VasirakCalgux/VolumeBoostYT.git
           cd VolumeBoostYT && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless ARCHS=arm64
           mv packages/*.deb ${{ github.workspace }}/volumeboost.deb
-          
+
       - name: Clone and Build YTNativeShare
         if: inputs.nativeshare == true && steps.cache_tweaks.outputs.cache_nativeshare_hit != 'true'
         run: |
