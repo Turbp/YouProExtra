@@ -22,7 +22,7 @@ on:
 
       opensafari:
         description: "Integrate Open in YouTube (Safari Extension)"
-        default: true
+        default: false
         required: false
         type: boolean
 
