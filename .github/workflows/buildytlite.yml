@@ -16,13 +16,13 @@ on:
 
       bundle_id:
         description: "Bundle ID (Optional)"
-        default: "com.google.ios.youtube"
+        default: "com.google.ios.youtubelite"
         required: true
         type: string
 
       opensafari:
         description: "Integrate Open in YouTube (Safari Extension)"
-        default: true
+        default: false
         required: false
         type: boolean
 
@@ -52,19 +52,19 @@ on:
 
       ytabconfig:
         description: "Integrate YTABConfig"
-        default: true
+        default: false
         required: false
         type: boolean
 
       youquality:
         description: "Integrate YouQuality"
-        default: true
+        default: false
         required: false
         type: boolean
 
       youchoose:
         description: "Integrate YouChooseQuality"
-        default: true
+        default: false
         required: false
         type: boolean
 
@@ -106,7 +106,7 @@ on:
 
       pleasedontstopthemusic:
         description: "Integrate PleaseDontStopTheMusic"
-        default: false
+        default: true
         required: false
         type: boolean
 
