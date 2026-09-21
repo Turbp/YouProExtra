@@ -16,7 +16,7 @@ on:
 
       bundle_id:
         description: "Bundle ID (Optional)"
-        default: "com.turbp.mePlayer"
+        default: "com.turbp.tube"
         required: true
         type: string
 
