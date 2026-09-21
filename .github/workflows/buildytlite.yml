@@ -16,7 +16,7 @@ on:
 
       bundle_id:
         description: "Bundle ID (Optional)"
-        default: "com.google.ios.youtubelite"
+        default: "com.turbp.mePlayer"
         required: true
         type: string
 
