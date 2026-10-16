@@ -249,7 +249,6 @@ jobs:
           ythold_commit: ${{ steps.commit_hashes.outputs.ythold }}
           volumeboost_commit: ${{ steps.commit_hashes.outputs.volumeboost }}
           nativeshare_commit: ${{ steps.commit_hashes.outputs.nativeshare }}
-          youfixplaybackissues_commit: ${{ steps.commit_hashes.outputs.youfixplaybackissues }}
           pleasedontstopthemusic_commit: ${{ steps.commit_hashes.outputs.pleasedontstopthemusic }}
           
       - name: Build YTVideoOverlay
@@ -365,13 +364,6 @@ jobs:
           git clone --quiet --depth=1 https://github.com/protocolbuffers/protobuf.git
           make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless ARCHS=arm64
           mv packages/*.deb ${{ github.workspace }}/nativeshare.deb
-
-      - name: Clone and Build YouFixPlaybackIssues
-        if: steps.cache_tweaks.outputs.cache_youfixplaybackissues_hit != 'true'
-        run: |
-          git clone --quiet --depth=1 https://github.com/mrdrvt99/YouFixPlaybackIssues.git
-          cd YouFixPlaybackIssues/YouFixPlaybackIssues && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless TARGET=iphone:clang:18.6
-          mv packages/*.deb ${{ github.workspace }}/youfixplaybackissues.deb
 
       - name: Clone and Build PleaseDontStopTheMusic
         if: inputs.pleasedontstopthemusic == true && steps.cache_tweaks.outputs.cache_pleasedontstopthemusic_hit != 'true'
