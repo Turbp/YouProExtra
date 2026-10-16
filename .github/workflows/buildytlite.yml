@@ -16,13 +16,13 @@ on:
 
       bundle_id:
         description: "Bundle ID (Optional)"
-        default: "com.turbp.tube"
+        default: "com.google.ios.youtube"
         required: true
         type: string
 
       opensafari:
         description: "Integrate Open in YouTube (Safari Extension)"
-        default: false
+        default: true
         required: false
         type: boolean
 
@@ -52,19 +52,19 @@ on:
 
       ytabconfig:
         description: "Integrate YTABConfig"
-        default: false
+        default: true
         required: false
         type: boolean
 
       youquality:
         description: "Integrate YouQuality"
-        default: false
+        default: true
         required: false
         type: boolean
 
       youchoose:
         description: "Integrate YouChooseQuality"
-        default: false
+        default: true
         required: false
         type: boolean
 
@@ -103,16 +103,10 @@ on:
         default: false
         required: false
         type: boolean
-        
-      YouFixPlaybackIssues:
-        description: "Integrate YouFixPlaybackIssues"
-        default: false
-        required: false
-        type: boolean
-        
+
       pleasedontstopthemusic:
         description: "Integrate PleaseDontStopTheMusic"
-        default: true
+        default: false
         required: false
         type: boolean
 
@@ -160,7 +154,6 @@ jobs:
           ythold: ${{ inputs.ythold }}
           volumeboost: ${{ inputs.volumeboost }}
           nativeshare: ${{ inputs.nativeshare }}
-          YouFixPlaybackIssues: ${{ inputs.YouFixPlaybackIssues }}
           pleasedontstopthemusic: ${{ inputs.pleasedontstopthemusic }}
 
       - name: Install Dependencies
@@ -239,7 +232,6 @@ jobs:
           ythold: ${{ inputs.ythold }}
           volumeboost: ${{ inputs.volumeboost }}
           nativeshare: ${{ inputs.nativeshare }}
-          YouFixPlaybackIssues: ${{ inputs.YouFixPlaybackIssues }}
           pleasedontstopthemusic: ${{ inputs.pleasedontstopthemusic }}
           theos_commit: ${{ steps.commit_hashes.outputs.theos }}
           youpip_commit: ${{ steps.commit_hashes.outputs.youpip }}
@@ -257,7 +249,7 @@ jobs:
           ythold_commit: ${{ steps.commit_hashes.outputs.ythold }}
           volumeboost_commit: ${{ steps.commit_hashes.outputs.volumeboost }}
           nativeshare_commit: ${{ steps.commit_hashes.outputs.nativeshare }}
-          YouFixPlaybackIssues_commit: ${{ steps.commit_hashes.outputs.YouFixPlaybackIssues }}
+          youfixplaybackissues_commit: ${{ steps.commit_hashes.outputs.youfixplaybackissues }}
           pleasedontstopthemusic_commit: ${{ steps.commit_hashes.outputs.pleasedontstopthemusic }}
           
       - name: Build YTVideoOverlay
@@ -375,7 +367,7 @@ jobs:
           mv packages/*.deb ${{ github.workspace }}/nativeshare.deb
 
       - name: Clone and Build YouFixPlaybackIssues
-        if:  inputs.YouFixPlaybackIssues == true && steps.cache_tweaks.outputs.cache_youfixplaybackissues_hit != 'true'
+        if: steps.cache_tweaks.outputs.cache_youfixplaybackissues_hit != 'true'
         run: |
           git clone --quiet --depth=1 https://github.com/mrdrvt99/YouFixPlaybackIssues.git
           cd YouFixPlaybackIssues/YouFixPlaybackIssues && make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless TARGET=iphone:clang:18.6
